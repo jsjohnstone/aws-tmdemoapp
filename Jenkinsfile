@@ -1,5 +1,9 @@
 pipeline {
   agent any
+  environment {
+    registry = "jsjohnstone/tmapp"
+    registryCredential = 'dockerhub'
+  }
   stages {
     stage('Test/Lint') {
       steps {
@@ -8,12 +12,14 @@ pipeline {
     }
     stage('Build Docker Image') {
       steps {
-        sh "echo 'Build Docker image'"
+            sh "docker build -t ${registry}:latest ."
       }
     }
     stage('Upload Docker Image') {
       steps {
-        sh "echo 'Upload Docker Image'"
+        withDockerRegistry([ credentialsId: registryCredential, url: "" ]) {
+            sh "docker push ${registry}:latest"
+        }
       }
     }
     stage('Obtain AWS Credentials') {
