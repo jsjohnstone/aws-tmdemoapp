@@ -24,4 +24,4 @@ def get_events():
     return render_template('shows.html', title='Upcoming Shows', events=data['_embedded']['events']) 
 
 if __name__ == "__main__":     
-    app.run()               
+    app.run(host='0.0.0.0')               
