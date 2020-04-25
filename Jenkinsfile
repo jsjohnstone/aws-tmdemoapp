@@ -1,25 +1,20 @@
 pipeline {
   agent any
   environment {
-    registry = "jsjohnstone/tmapp"
-    registryCredential = 'dockerhub'
+    registry = "tmapp"
+    awsRegion = 'us-west-2'
+    awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
   }
   stages {
     stage('Test/Lint') {
       steps {
-        sh "echo 'Test/Lint'"
+        sh 'docker run --rm -i hadolint/hadolint < Dockerfile'
       }
     }
     stage('Build Docker Image') {
       steps {
             sh "docker build -t ${registry}:latest ."
-      }
-    }
-    stage('Upload Docker Image') {
-      steps {
-        withDockerRegistry([ credentialsId: registryCredential, url: "" ]) {
-            sh "docker push ${registry}:latest"
-        }
+            sh "docker tag ${registry} ${awsECR}/${registry}"
       }
     }
     stage('Obtain AWS Credentials') {
@@ -33,13 +28,77 @@ pipeline {
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.boto
                echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >>~/.aws/credentials
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.aws/credentials
+               aws ecr get-login-password --region ${awsRegion} | docker login --username AWS --password-stdin ${awsECR}
         """
         }
       }
     }
-    stage('Create EC2 Instance') {
+    stage('Upload Docker Image') {
       steps {
-        sh "echo 'Create'"
+            sh "docker push ${awsECR}/${registry}:latest"
+      }
+    }
+    stage('Identify Live') {
+      steps {
+        sh "echo 'Identify which zone Service is currently pointing to'"
+      }
+    }
+    stage('Deploy Standby') {
+      steps {
+        withAWS(region:'us-west-2', credentials:'aws-static') {
+            sh '''
+            cat <<EOF | kubectl apply -f -
+            apiVersion: v1
+            kind: ReplicationController
+            metadata:
+                name: tmapp-blue
+                labels:
+                    app: tmapp-blue
+            spec:
+                replicas: 1
+                selector:
+                    app : tmapp-blue
+                template:
+                    metadata:
+                        labels:
+                            app: tmapp-blue
+                    spec:
+                        containers:
+                            - name: tmapp-blue
+                              image: ${registry}:latest
+            EOF
+            '''
+        }
+      }
+    }
+    stage('Switch Approval') {
+      steps {
+        input "Switch LIVE traffic to Blue Zone?"
+      }
+    }
+    stage('Switch Live') {
+      steps {
+        withAWS(region:'us-west-2', credentials:'aws-static') {
+            sh '''
+            cat <<EOF | kubectl apply -f -
+            apiVersion: v1
+            kind: Service
+            metadata:
+                name: tmapp-lb
+                labels:
+                    app: tmapp-lb
+            spec:
+                type: LoadBalancer
+                ports:
+                - port: 5000
+                  targetPort: 80
+                  protocol: TCP
+                  name: http
+                selector:
+                    app: blue
+            EOF
+            '''
+        }
       }
     }
   }
