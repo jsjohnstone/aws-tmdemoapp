@@ -21,7 +21,7 @@ pipeline {
     }
     stage('Update kubectl config') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '${jenkinsAWSCreds}', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: ${jenkinsAWSCreds}, secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
                mkdir -p ~/.aws
                echo "[default]" >~/.aws/credentials
