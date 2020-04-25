@@ -13,7 +13,7 @@ app = Flask(__name__)
 @app.route("/")                  
 def get_events():                 
     r = requests.get(
-      'https://app.ticketmaster.com/discovery/v2/events.json?countryCode=NZ&apikey=123)
+      'https://app.ticketmaster.com/discovery/v2/events.json?countryCode=NZ&apikey=123')
     data  = json.loads(r.text)
 
     return render_template('shows.html', title='Upcoming Shows', events=data['_embedded']['events']) 
