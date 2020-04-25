@@ -28,8 +28,9 @@ pipeline {
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.boto
                echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >>~/.aws/credentials
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.aws/credentials
-               aws ecr get-login-password --region ${awsRegion} | docker login --username AWS --password-stdin ${awsECR}
-        """
+               LOGINCMD=$( aws ecr get-login --no-include-email --region us-west-2 )  
+               eval "$LOGINCMD"
+               """
         }
       }
     }
