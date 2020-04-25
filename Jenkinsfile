@@ -20,7 +20,7 @@ pipeline {
     stage('Obtain AWS Credentials') {
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-static	', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-        sh """  
+        sh '''
                mkdir -p ~/.aws
                echo "[default]" >~/.aws/credentials
                echo "[default]" >~/.boto
@@ -30,7 +30,7 @@ pipeline {
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.aws/credentials
                LOGINCMD=$( aws ecr get-login --no-include-email --region us-west-2 )  
                eval "$LOGINCMD"
-               """
+        '''
         }
       }
     }
