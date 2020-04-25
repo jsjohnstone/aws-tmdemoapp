@@ -9,14 +9,10 @@ import json
 import os
 
 app = Flask(__name__)             
-
-@app.route("/")                  
-def get_events():                 
-    r = requests.get(
-      'https://app.ticketmaster.com/discovery/v2/events.json?countryCode=NZ&apikey=123')
-    data  = json.loads(r.text)
-
-    return render_template('shows.html', title='Upcoming Shows', events=data['_embedded']['events']) 
+               
+@app.route("/")
+    def hello():
+        return "Hello Green!"
 
 if __name__ == "__main__":     
     app.run(host='0.0.0.0')               
