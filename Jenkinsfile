@@ -65,24 +65,25 @@ pipeline {
         withAWS(region:'us-west-2', credentials:'aws-static') {
             sh '''
             cat <<EOF | kubectl apply -f -
-            apiVersion: v1
-            kind: ReplicationController
+
+            apiVersion: extensions/v1beta1
+            kind: Deployment
             metadata:
-                name: tmapp-blue
-                labels:
-                    app: tmapp-blue
+              name: tmapp-${newEnvironment()}
             spec:
-                replicas: 1
-                selector:
-                    app : tmapp-blue
-                template:
-                    metadata:
-                        labels:
-                            app: tmapp-blue
-                    spec:
-                        containers:
-                            - name: tmapp-blue
-                              image: ${registry}:latest
+              replicas: 1
+              template:
+                metadata:
+                  labels:
+                    app: tmapp
+                    role: ${newEnvironment()}
+                spec:
+                  containers:
+                  - name: tmapp-container-${newEnvironment()}
+                    image: ${awsECR}/${registry}:${GIT_COMMIT}
+                   ports:
+                   - containerPort: 5000
+
             EOF
             '''
         }
@@ -90,7 +91,7 @@ pipeline {
     }
     stage('Switch Approval') {
       steps {
-        input "Switch LIVE traffic to Blue Zone?"
+        input "Switch LIVE traffic to ${newEnvironment()} Zone?"
       }
     }
     stage('Switch Live') {
