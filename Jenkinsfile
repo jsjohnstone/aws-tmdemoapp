@@ -42,7 +42,7 @@ pipeline {
     stage('Identify Live') {
       steps {
         currentEnvironment = sh (
-            script: 'current_role="\$(kubectl get services tmapp-service --output json | jq -r .spec.selector.role)"',
+            script: 'kubectl get services tmapp-service --output json | jq -r .spec.selector.role',
             returnStdout: true
         ).trim()
       }
