@@ -64,9 +64,10 @@ pipeline {
     stage('Deploy Standby') {
         steps {
             script {
-                sh "sed 's|%targetEnvironment%|${targetEnvironment}|g' deployment.template.yml > deployment.yml"
-                sh "sed 's|%targetImage%|${awsECR}/${registry}:${GIT_COMMIT}|g' deployment.yml > deployment.yml"
-                sh "kubectl apply -f deployment.yml"
+                sh "cp deployment.template.yml deployment.${GIT_COMMIT}.yml"
+                sh "sed -i -e 's|%targetEnvironment%|${targetEnvironment}|g' deployment.${GIT_COMMIT}.yml"
+                sh "sed -i -e 's|%targetImage%|${awsECR}/${registry}:${GIT_COMMIT}|g' deployment.${GIT_COMMIT}.yml"
+                sh "kubectl apply -f deployment.${GIT_COMMIT}.yml"
             }
         }
     }
