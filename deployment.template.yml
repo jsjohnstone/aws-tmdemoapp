@@ -13,5 +13,8 @@ spec:
       containers:
       - name: tmapp-container-%targetEnvironment%
         image: %targetImage%
+        env:
+            - name: TM_API_KEY
+              value: %TM_API_KEY%
         ports:
         - containerPort: 5000

@@ -5,6 +5,7 @@ pipeline {
     awsRegion = 'us-west-2'
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
     awsEKSCluster = 'tm-app'
+    tmAPIKey = credentials('tm_api_key')
   }
   stages {
     stage('Test/Lint') {
@@ -65,8 +66,10 @@ pipeline {
         steps {
             script {
                 sh "cp deployment.template.yml deployment.${GIT_COMMIT}.yml"
+                
                 sh "sed -i -e 's|%targetEnvironment%|${targetEnvironment}|g' deployment.${GIT_COMMIT}.yml"
                 sh "sed -i -e 's|%targetImage%|${awsECR}/${registry}:${GIT_COMMIT}|g' deployment.${GIT_COMMIT}.yml"
+                sh "sed -i -e 's|%TM_API_KEY%|${tmAPIKey}|g' deployment.${GIT_COMMIT}.yml"
                 sh "kubectl apply -f deployment.${GIT_COMMIT}.yml"
             }
         }
