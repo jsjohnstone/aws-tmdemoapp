@@ -54,9 +54,9 @@ pipeline {
                 
                 echo "***************************  CURRENT: ${currentEnvironment}     NEW: ${newEnvironment()}  *****************************"
 
-                targetEnvironment = newEnvironment()
+                env.TARGET_ROLE = newEnvironment()
                 
-                sh 'kubectl delete deployment tmapp-${targetEnvironment}'
+                sh 'kubectl delete deployment tmapp-\$TARGET_ROLE'
             }
         }
     }
