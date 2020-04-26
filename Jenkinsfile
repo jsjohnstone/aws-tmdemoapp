@@ -6,7 +6,6 @@ pipeline {
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
     jenkinsAWSCreds = 'aws-static'
     awsEKSCluster = 'tm-app'
-    commit = '${GIT_REVISION,length=8}'
   }
   stages {
     stage('Test/Lint') {
@@ -16,8 +15,8 @@ pipeline {
     }
     stage('Build Image') {
       steps {
-            sh "docker build -t ${registry}:${commit} ."
-            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${commit}"
+            sh "docker build -t ${awsECR}/${registry} ."
+            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${GIT_COMMIT}"
       }
     }
     stage('Update kubectl config') {
@@ -38,7 +37,7 @@ pipeline {
     }
     stage('Upload Image') {
       steps {
-            sh "docker push ${awsECR}/${registry}:${commit}"
+            sh "docker push ${awsECR}/${registry}:${GIT_COMMIT}"
       }
     }
     stage('Identify Live') {
