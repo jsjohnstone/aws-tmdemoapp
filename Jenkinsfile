@@ -13,8 +13,8 @@ pipeline {
     }
     stage('Build Docker Image') {
       steps {
-            sh "docker build -t ${registry}:latest ."
-            sh "docker tag ${registry} ${awsECR}/${registry}"
+            sh "docker build -t ${awsECR}/${registry} ."
+            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${GIT_COMMIT}"
       }
     }
     stage('Obtain AWS Credentials') {
@@ -36,7 +36,7 @@ pipeline {
     }
     stage('Upload Docker Image') {
       steps {
-            sh "docker push ${awsECR}/${registry}:latest"
+            sh "docker push ${awsECR}/${registry}:${GIT_COMMIT}"
       }
     }
     stage('Identify Live') {
