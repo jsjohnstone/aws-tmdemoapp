@@ -55,6 +55,7 @@ pipeline {
                 echo "***************************  CURRENT: ${currentEnvironment}     NEW: ${newEnvironment()}  *****************************"
 
                 env.TARGET_ROLE = newEnvironment()
+                targetEnvironment = newEnvironment()
                 
                 sh 'kubectl delete deployment tmapp-\$TARGET_ROLE'
             }
@@ -69,17 +70,17 @@ pipeline {
                 apiVersion: extensions/v1beta1
                 kind: Deployment
                 metadata:
-                  name: tmapp-${newEnvironment()}
+                  name: tmapp-${targetEnvironment}
                 spec:
                   replicas: 1
                   template:
                     metadata:
                       labels:
                         app: tmapp
-                        role: ${newEnvironment()}
+                        role: ${targetEnvironment}
                     spec:
                       containers:
-                      - name: tmapp-container-${newEnvironment()}
+                      - name: tmapp-container-${targetEnvironment}
                         image: ${awsECR}/${registry}:${GIT_COMMIT}
                        ports:
                        - containerPort: 5000
