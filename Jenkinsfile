@@ -62,30 +62,31 @@ pipeline {
     }
     stage('Deploy Standby') {
       steps {
-        withAWS(region:'us-west-2', credentials:'aws-static') {
-            sh '''
-            cat <<EOF | kubectl apply -f -
+        script {
+            sh (
+                script: '''
+                    cat <<EOF | kubectl apply -f -
+                    apiVersion: extensions/v1beta1
+                    kind: Deployment
+                    metadata:
+                      name: tmapp-${newEnvironment()}
+                    spec:
+                      replicas: 1
+                      template:
+                        metadata:
+                          labels:
+                            app: tmapp
+                            role: ${newEnvironment()}
+                        spec:
+                          containers:
+                          - name: tmapp-container-${newEnvironment()}
+                            image: ${awsECR}/${registry}:${GIT_COMMIT}
+                           ports:
+                           - containerPort: 5000
 
-            apiVersion: extensions/v1beta1
-            kind: Deployment
-            metadata:
-              name: tmapp-${newEnvironment()}
-            spec:
-              replicas: 1
-              template:
-                metadata:
-                  labels:
-                    app: tmapp
-                    role: ${newEnvironment()}
-                spec:
-                  containers:
-                  - name: tmapp-container-${newEnvironment()}
-                    image: ${awsECR}/${registry}:${GIT_COMMIT}
-                   ports:
-                   - containerPort: 5000
-
-            EOF
-            '''
+                    EOF
+                '''
+            )
         }
       }
     }
