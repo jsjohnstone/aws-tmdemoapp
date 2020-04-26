@@ -72,32 +72,15 @@ pipeline {
         }
     }
     stage('Switch Approval') {
-      steps {
         input "Switch LIVE traffic to ${newEnvironment()} Zone?"
-      }
     }
     stage('Switch Live') {
       steps {
-        withAWS(region:'us-west-2', credentials:'aws-static') {
-            sh '''
-            cat <<EOF | kubectl apply -f -
-            apiVersion: v1
-            kind: Service
-            metadata:
-                name: tmapp-lb
-                labels:
-                    app: tmapp-lb
-            spec:
-                type: LoadBalancer
-                ports:
-                - port: 5000
-                  targetPort: 80
-                  protocol: TCP
-                  name: http
-                selector:
-                    app: blue
-            EOF
-            '''
+            script {
+                sh "cp service.template.yml service.${GIT_COMMIT}.yml"
+                sh "sed -i -e 's|%targetEnvironment%|${targetEnvironment}|g' service.${GIT_COMMIT}.yml"
+                sh "kubectl apply -f service.${GIT_COMMIT}.yml"
+            }
         }
       }
     }
