@@ -81,12 +81,10 @@ pipeline {
                     spec:
                       containers:
                       - name: tmapp-container-${targetEnvironment}
-                        image: '${awsECR}/${registry}:${GIT_COMMIT}'
+                        image: ${awsECR}/${registry}:${GIT_COMMIT}
                         ports:
                         - containerPort: 5000
-
-                EOF
-                """
+                EOF"""
             }
         }
     }
