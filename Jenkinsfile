@@ -16,7 +16,7 @@ pipeline {
     stage('Build Image') {
       steps {
             sh "docker build -t ${awsECR}/${registry} ."
-            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${GIT_COMMIT}"
+            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}"
       }
     }
     stage('Update kubectl config') {
@@ -37,7 +37,7 @@ pipeline {
     }
     stage('Upload Image') {
       steps {
-            sh "docker push ${awsECR}/${registry}:${GIT_COMMIT}"
+            sh "docker push ${awsECR}/${registry}"
       }
     }
     stage('Identify Live') {
