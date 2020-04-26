@@ -82,7 +82,7 @@ pipeline {
                 sh "kubectl apply -f service.${GIT_COMMIT}.yml"
             }
         }
-      }
+      
     }
   }
 }
