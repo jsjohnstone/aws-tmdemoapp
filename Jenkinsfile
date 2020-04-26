@@ -75,9 +75,6 @@ pipeline {
         input{
 		    message "Press Ok to continue"
 	    }
-	    steps { 
-		    echo "User: ${username} said Ok."
-	    }
     }
     stage('Switch Live') {
       steps {
