@@ -41,25 +41,18 @@ pipeline {
     }
     stage('Identify Live') {
       steps {
-        sh '''
-        current_role="\$(kubectl get services tmapp-service --output json | jq -r .spec.selector.role)"
-        if [ "\$current_role" = null ]; then
-                  echo "Unable to determine current environment"
-                  exit 1
-        fi
-        echo "\$current_role" >current-environment
-        '''
+        currentEnvironment = sh (
+            script: 'current_role="\$(kubectl get services tmapp-service --output json | jq -r .spec.selector.role)"',
+            returnStdout: true
+        ).trim()
 
-        currentEnvironment = readFile('current-environment').trim()
-        script {
-            if (currentEnvironment == 'blue') {
-                newEnvironment = 'green'
+        if (currentEnvironment == 'blue') {
+            newEnvironment = 'green'
+        } else {
+            if (currentEnvironment == 'green') {
+                newEnvironment = 'blue'
             } else {
-                if (currentEnvironment == 'green') {
-                    newEnvironment = 'blue'
-                } else {
-                    error('Could not determine target environment.')
-                }
+                error('Could not determine target environment.')
             }
         }
       }
