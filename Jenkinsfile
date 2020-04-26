@@ -75,6 +75,9 @@ pipeline {
         input{
 		    message "Press Ok to continue"
 	    }
+	    steps { 
+		    echo "Approved."
+	    }
     }
     stage('Switch Live') {
       steps {
