@@ -55,6 +55,7 @@ pipeline {
                 echo "***************************  CURRENT: ${currentEnvironment}     NEW: ${newEnvironment()}  *****************************"
 
                 targetEnvironment = newEnvironment()
+            }
         }
     }
     stage('Deploy Standby') {
