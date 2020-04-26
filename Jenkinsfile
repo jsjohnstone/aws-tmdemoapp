@@ -4,6 +4,7 @@ pipeline {
     registry = "tmapp"
     awsRegion = 'us-west-2'
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
+    awsEKSCluster = 'tm-app'
   }
   stages {
     stage('Test/Lint') {
