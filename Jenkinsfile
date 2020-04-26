@@ -62,29 +62,31 @@ pipeline {
     }
     stage('Deploy Standby') {
         steps {
-            sh """
-            cat <<EOF | kubectl apply -f -
-
-            apiVersion: extensions/v1beta1
-            kind: Deployment
-            metadata:
-              name: tmapp-${newEnvironment()}
-            spec:
-              replicas: 1
-              template:
+            script {
+                sh """
+                cat <<EOF | kubectl apply -f -
+    
+                apiVersion: extensions/v1beta1
+                kind: Deployment
                 metadata:
-                  labels:
-                    app: tmapp
-                    role: ${newEnvironment()}
+                  name: tmapp-${newEnvironment()}
                 spec:
-                  containers:
-                  - name: tmapp-container-${newEnvironment()}
-                    image: ${awsECR}/${registry}:${GIT_COMMIT}
-                   ports:
-                   - containerPort: 5000
+                  replicas: 1
+                  template:
+                    metadata:
+                      labels:
+                        app: tmapp
+                        role: ${newEnvironment()}
+                    spec:
+                      containers:
+                      - name: tmapp-container-${newEnvironment()}
+                        image: ${awsECR}/${registry}:${GIT_COMMIT}
+                       ports:
+                       - containerPort: 5000
 
-            EOF
-            """
+                EOF
+                """
+            }
         }
     }
     stage('Switch Approval') {
