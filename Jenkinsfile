@@ -6,7 +6,7 @@ pipeline {
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
     jenkinsAWSCreds = 'aws-static'
     awsEKSCluster = 'tm-app'
-    commit = '${GIT_COMMIT[0..7]}'
+    commit = '${GIT_REVISION,length=8}'
   }
   stages {
     stage('Test/Lint') {
