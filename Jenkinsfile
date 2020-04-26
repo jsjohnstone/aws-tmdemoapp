@@ -56,7 +56,7 @@ pipeline {
 
                 targetEnvironment = newEnvironment()
                 
-                sh 'kubectl delete deployment "tmapp-\targetEnvironment"'
+                sh 'kubectl delete deployment tmapp-${targetEnvironment}'
             }
         }
     }
