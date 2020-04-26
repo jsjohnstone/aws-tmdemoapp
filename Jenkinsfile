@@ -6,6 +6,7 @@ pipeline {
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
     jenkinsAWSCreds = 'aws-static'
     awsEKSCluster = 'tm-app'
+    commit = ${GIT_COMMIT[0..7]}
   }
   stages {
     stage('Test/Lint') {
@@ -15,13 +16,13 @@ pipeline {
     }
     stage('Build Image') {
       steps {
-            sh "docker build -t ${awsECR}/${registry} ."
-            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${GIT_COMMIT[0..7]}"
+            sh "docker build -t ${registry}:${commit} ."
+            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}:${commit}"
       }
     }
     stage('Update kubectl config') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: ${jenkinsAWSCreds}, secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '${jenkinsAWSCreds}', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
                mkdir -p ~/.aws
                echo "[default]" >~/.aws/credentials
@@ -37,7 +38,7 @@ pipeline {
     }
     stage('Upload Image') {
       steps {
-            sh "docker push ${awsECR}/${registry}"
+            sh "docker push ${awsECR}/${registry}:${commit}"
       }
     }
     stage('Identify Live') {
