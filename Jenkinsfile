@@ -40,12 +40,14 @@ pipeline {
       }
     }
     stage('Identify Live') {
-      steps {
-        currentEnvironment = sh (
-            script: 'kubectl get services tmapp-service --output json | jq -r .spec.selector.role',
-            returnStdout: true
-        ).trim()
-      }
+        steps {
+            script {
+                currentEnvironment = sh (
+                    script: 'kubectl get services tmapp-service --output json | jq -r .spec.selector.role',
+                    returnStdout: true
+                ).trim()
+            }
+        }
     }
     stage('Deploy Standby') {
       steps {
