@@ -42,11 +42,19 @@ pipeline {
     stage('Identify Live') {
         steps {
             script {
+                def currentEnvironment = 'blue'
+                def newEnvironment = { ->
+                    currentEnvironment == 'blue' ? 'green' : 'blue'
+                }
+
                 currentEnvironment = sh (
                     script: 'kubectl get services tmapp-service --output json | jq -r .spec.selector.role',
                     returnStdout: true
                 ).trim()
-            }
+                
+                echo "***************************  CURRENT: ${currentEnvironment}     NEW: ${newEnvironment()}  *****************************"
+
+                targetEnvironment = newEnvironment()
         }
     }
     stage('Deploy Standby') {
