@@ -9,7 +9,7 @@ The demonstration app is a simple Python flask application that obtains the Top 
 ### How does the deployment pipeline work?
 The package includes a Jenkinsfile which defines the following pipeline:
 
-#### 1. Test/List
+#### 1. Test/Lint
 This step does simple linting of the dockerfile to ensure it has been written correctly, using *hadolint*.
 
 #### 2. Build Docker Image
