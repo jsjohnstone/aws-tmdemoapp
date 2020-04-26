@@ -45,16 +45,6 @@ pipeline {
             script: 'current_role="\$(kubectl get services tmapp-service --output json | jq -r .spec.selector.role)"',
             returnStdout: true
         ).trim()
-
-        if (currentEnvironment == 'blue') {
-            newEnvironment = 'green'
-        } else {
-            if (currentEnvironment == 'green') {
-                newEnvironment = 'blue'
-            } else {
-                error('Could not determine target environment.')
-            }
-        }
       }
     }
     stage('Deploy Standby') {
