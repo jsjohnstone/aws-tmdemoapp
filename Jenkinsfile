@@ -4,8 +4,6 @@ pipeline {
     registry = "tmapp"
     awsRegion = 'us-west-2'
     awsECR = '287171483464.dkr.ecr.us-west-2.amazonaws.com'
-    jenkinsAWSCreds = 'aws-static'
-    awsEKSCluster = 'tm-app'
   }
   stages {
     stage('Test/Lint') {
@@ -13,15 +11,15 @@ pipeline {
         sh 'docker run --rm -i hadolint/hadolint < Dockerfile'
       }
     }
-    stage('Build Image') {
+    stage('Build Docker Image') {
       steps {
-            sh "docker build -t ${awsECR}/${registry} ."
-            sh "docker tag ${awsECR}/${registry} ${awsECR}/${registry}"
+            sh "docker build -t ${registry}:latest ."
+            sh "docker tag ${registry} ${awsECR}/${registry}"
       }
     }
-    stage('Update kubectl config') {
+    stage('Obtain AWS Credentials') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '${jenkinsAWSCreds}', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-static	', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
                mkdir -p ~/.aws
                echo "[default]" >~/.aws/credentials
@@ -30,14 +28,15 @@ pipeline {
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.boto
                echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >>~/.aws/credentials
                echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}">>~/.aws/credentials
-               aws eks --region ${awsRegion} update-kubeconfig --name ${awsEKSCluster}
+               LOGINCMD=$( aws ecr get-login --no-include-email --region us-west-2 )  
+               eval "$LOGINCMD"
         '''
         }
       }
     }
-    stage('Upload Image') {
+    stage('Upload Docker Image') {
       steps {
-            sh "docker push ${awsECR}/${registry}"
+            sh "docker push ${awsECR}/${registry}:latest"
       }
     }
     stage('Identify Live') {
