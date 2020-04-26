@@ -64,27 +64,9 @@ pipeline {
     stage('Deploy Standby') {
         steps {
             script {
-                sh """
-                cat <<EOF | kubectl apply -f -
-    
-                apiVersion: extensions/v1beta1
-                kind: Deployment
-                metadata:
-                  name: tmapp-${targetEnvironment}
-                spec:
-                  replicas: 1
-                  template:
-                    metadata:
-                      labels:
-                        app: tmapp
-                        role: ${targetEnvironment}
-                    spec:
-                      containers:
-                      - name: tmapp-container-${targetEnvironment}
-                        image: ${awsECR}/${registry}:${GIT_COMMIT}
-                        ports:
-                        - containerPort: 5000
-                EOF"""
+                sh "sed 's/%targetEnvironment%/${targetEnvironment}/g' deployment.template.yml > deployment.yml"
+                sh "sed 's/%targetImage%/${awsECR}/${registry}:${GIT_COMMIT}/g' deployment.yml > deployment.yml"
+                sh "kubectl apply -f deployment.yml"
             }
         }
     }

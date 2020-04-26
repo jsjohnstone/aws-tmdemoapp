@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: tmapp-%targetEnvironment%
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tmapp
+        role: %targetEnvironment%
+    spec:
+      containers:
+      - name: tmapp-container-%targetEnvironment%
+        image: %targetImage%
+        ports:
+        - containerPort: 5000
